@@ -226,11 +226,31 @@ Create functions to handle data storage and retrieval:
 - If no data exists: return default structure with sample students and empty seats object
 - This handles first-time users who don't have saved data yet
 
+**Minimal snippet:**
+```javascript
+const STORAGE_KEY = 'classroomData';
+
+function getData() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        return JSON.parse(stored);
+    }
+    return { students: [], seats: {} };
+}
+```
+
 **Function: `saveData(data)`**
 - Takes data object as parameter
 - Convert data to string using `JSON.stringify()`
 - Save to localStorage using `localStorage.setItem()`
 - Use your storage key constant
+
+**Minimal snippet:**
+```javascript
+function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+```
 
 **Function: `generateId()`**
 - Generate unique IDs for new students
@@ -238,6 +258,13 @@ Create functions to handle data storage and retrieval:
 - Use `Math.random().toString(36)` to create random alphanumeric string
 - Return a string that starts with 's' followed by the unique identifier
 - This prevents ID conflicts when creating multiple students
+
+**Minimal snippet:**
+```javascript
+function generateId() {
+    return 's' + Date.now() + Math.random().toString(36).substr(2, 9);
+}
+```
 
 **Learning Points:**
 - Functions encapsulate reusable logic
@@ -253,6 +280,13 @@ Cache frequently used DOM elements at the top of your script:
 - Store them in const variables with descriptive names
 - Get references for: student list container, search input, add button, modals, form elements, etc.
 - Place these at the top of your script file (after data management functions)
+
+**Minimal snippet:**
+```javascript
+const studentList = document.getElementById('studentList');
+const searchInput = document.getElementById('searchInput');
+const addStudentBtn = document.getElementById('addStudentBtn');
+```
 
 **Why Cache Elements:**
 - Avoids repeated DOM queries (faster performance)
@@ -300,6 +334,25 @@ Cache frequently used DOM elements at the top of your script:
 - `appendChild()` - adds elements to the DOM
 - Always re-attach listeners after rendering dynamic content
 
+**Minimal snippets:**
+```javascript
+// Creating an element
+const div = document.createElement('div');
+div.className = 'student-card';
+div.setAttribute('data-student-id', student.id);
+
+// Filtering array
+const filtered = students.filter(s => 
+    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+// Looping and appending
+filtered.forEach(student => {
+    const item = renderStudentItem(student);
+    studentList.appendChild(item);
+});
+```
+
 #### 3.4 Modal Management
 
 **Function: `openStudentModal(studentId = null)`**
@@ -330,6 +383,20 @@ Cache frequently used DOM elements at the top of your script:
 - Modals use the `hidden` CSS class to toggle visibility
 - Always reset form state when closing to prevent stale data
 - Focus management improves accessibility
+
+**Minimal snippets:**
+```javascript
+// Opening modal
+function openStudentModal(studentId = null) {
+    studentModal.classList.remove('hidden');
+    document.getElementById('studentName').focus();
+}
+
+// Closing modal
+function closeStudentModal() {
+    studentModal.classList.add('hidden');
+}
+```
 
 #### 3.5 Form Handling
 
@@ -368,6 +435,21 @@ Cache frequently used DOM elements at the top of your script:
 - `trim()` removes leading/trailing whitespace
 - Update UI after saving data to reflect changes
 - Handle both create and update in one function
+
+**Minimal snippet:**
+```javascript
+function handleStudentSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('studentName').value.trim();
+    const age = document.getElementById('studentAge').value;
+    
+    if (!name || !age) {
+        // Show error
+        return;
+    }
+    // Save student...
+}
+```
 
 **Function: `addLanguageTag(language)`**
 - Takes language string as parameter
@@ -451,6 +533,23 @@ Set up all event listeners and initial rendering:
 - Always initialize the app when page loads
 - Organize listeners logically by feature
 
+**Minimal snippet:**
+```javascript
+function init() {
+    searchInput.addEventListener('input', (e) => {
+        renderStudentList(e.target.value);
+    });
+    
+    addStudentBtn.addEventListener('click', () => {
+        openStudentModal();
+    });
+    
+    renderStudentList();
+}
+
+init();
+```
+
 #### 3.7 Drag and Drop Implementation (BONUS - Optional Feature)
 
 > **Note for Students:** Drag and Drop is a bonus feature. You can complete the project without it, using only the click-to-assign method. However, implementing drag and drop will give you extra practice with advanced JavaScript APIs!
@@ -515,6 +614,29 @@ You'll need to handle these four drag events:
 - Visual feedback (CSS classes) improves user experience
 - Always clean up state after drag operations
 - Test drag and drop thoroughly - it can be tricky!
+
+**Minimal snippets:**
+```javascript
+let draggedStudentId = null;
+
+function handleDragStart(e) {
+    draggedStudentId = e.currentTarget.getAttribute('data-student-id');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const seatKey = e.currentTarget.getAttribute('data-seat-key');
+    if (seatKey && draggedStudentId) {
+        assignStudentToSeat(draggedStudentId, seatKey);
+    }
+}
+```
 
 ### Part 4: CSS Styling
 
@@ -584,6 +706,12 @@ You'll need to handle these four drag events:
 - Easy multi-line strings
 - Expression interpolation
 
+**Minimal snippet:**
+```javascript
+// Instead of: '<div>' + student.name + '</div>'
+const html = `<div>${student.name}</div>`;
+```
+
 #### 5.2 Array Methods
 
 You'll use these array methods frequently:
@@ -612,6 +740,20 @@ You'll use these array methods frequently:
 - Takes a function to execute for each item
 - Doesn't return anything (use for side effects)
 - Use for: rendering multiple items, executing actions on each item
+
+**Minimal snippets:**
+```javascript
+// filter example
+const filtered = students.filter(s => s.age >= 18);
+
+// find example
+const student = students.find(s => s.id === 's1');
+
+// forEach example
+students.forEach(student => {
+    console.log(student.name);
+});
+```
 
 #### 5.3 Object Destructuring
 
@@ -645,11 +787,27 @@ You'll use these array methods frequently:
 - Save updated data back to localStorage
 - Refresh the display
 
+**Minimal snippet:**
+```javascript
+const newStudent = { id: generateId(), name, age, note, languages };
+const data = getData();
+data.students.push(newStudent);
+saveData(data);
+```
+
 **Read (Get Student):**
 - Get current data from localStorage
 - Use `find()` method to search students array
 - Match by student ID
 - Return the student object (or undefined if not found)
+
+**Minimal snippet:**
+```javascript
+function getStudent(id) {
+    const data = getData();
+    return data.students.find(s => s.id === id);
+}
+```
 
 **Update (Edit Student):**
 - Get current data from localStorage
@@ -660,6 +818,16 @@ You'll use these array methods frequently:
 - Save updated data to localStorage
 - Refresh the display
 
+**Minimal snippet:**
+```javascript
+const data = getData();
+const index = data.students.findIndex(s => s.id === id);
+if (index !== -1) {
+    data.students[index] = { ...data.students[index], ...updates };
+    saveData(data);
+}
+```
+
 **Delete (Remove Student):**
 - Get current data from localStorage
 - Filter students array: keep all students EXCEPT the one to delete
@@ -667,6 +835,13 @@ You'll use these array methods frequently:
 - Also remove student from any assigned seats (loop through seats object)
 - Save updated data to localStorage
 - Refresh the display
+
+**Minimal snippet:**
+```javascript
+const data = getData();
+data.students = data.students.filter(s => s.id !== id);
+saveData(data);
+```
 
 #### 6.2 Event Delegation
 
@@ -738,6 +913,18 @@ Organize code into logical sections:
 - If invalid: show error, return early
 - If valid: proceed with saving
 - Clear errors on successful save
+
+**Minimal snippet:**
+```javascript
+if (!name || name.trim() === '') {
+    showError('Name is required');
+    return;
+}
+if (!age || age < 1) {
+    showError('Age must be valid');
+    return;
+}
+```
 
 #### 7.4 Security: XSS Prevention
 
